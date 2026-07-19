@@ -153,3 +153,44 @@ def liquidity_label(current_ratio_value):
         return "Average"
 
     return "Weak"
+def earnings_per_share(net_profit, shares_outstanding):
+    if shares_outstanding <= 0:
+        return None
+    return round(net_profit / shares_outstanding, 2)
+
+
+def price_to_earnings(price, eps):
+    if eps <= 0:
+        return None
+    return round(price / eps, 2)
+
+
+def book_value_per_share(net_worth, shares_outstanding):
+    if shares_outstanding <= 0:
+        return None
+    return round(net_worth / shares_outstanding, 2)
+
+
+def price_to_book(price, book_value):
+    if book_value <= 0:
+        return None
+    return round(price / book_value, 2)
+
+
+def price_to_sales(market_cap, sales):
+    if sales <= 0:
+        return None
+    return round(market_cap / sales, 2)
+
+
+def valuation_label(pe_ratio):
+    if pe_ratio is None:
+        return "Unknown"
+
+    if pe_ratio < 15:
+        return "Undervalued"
+
+    if pe_ratio <= 25:
+        return "Fairly Valued"
+
+    return "Overvalued"
