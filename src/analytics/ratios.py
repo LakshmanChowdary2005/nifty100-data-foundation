@@ -120,3 +120,36 @@ def asset_turnover(sales, total_assets):
     if total_assets == 0:
         return None
     return round(sales / total_assets, 2)
+def current_ratio(current_assets, current_liabilities):
+    if current_liabilities == 0:
+        return None
+    return round(current_assets / current_liabilities, 2)
+
+
+def quick_ratio(current_assets, inventory, current_liabilities):
+    if current_liabilities == 0:
+        return None
+    return round((current_assets - inventory) / current_liabilities, 2)
+
+
+def cash_ratio(cash, current_liabilities):
+    if current_liabilities == 0:
+        return None
+    return round(cash / current_liabilities, 2)
+
+
+def working_capital(current_assets, current_liabilities):
+    return current_assets - current_liabilities
+
+
+def liquidity_label(current_ratio_value):
+    if current_ratio_value is None:
+        return "Unknown"
+
+    if current_ratio_value >= 2:
+        return "Strong"
+
+    if current_ratio_value >= 1:
+        return "Average"
+
+    return "Weak"
