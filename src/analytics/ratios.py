@@ -194,3 +194,38 @@ def valuation_label(pe_ratio):
         return "Fairly Valued"
 
     return "Overvalued"
+def pe_ratio(price, eps):
+    if eps == 0:
+        return None
+    return round(price / eps, 2)
+
+
+def pb_ratio(price, book_value_per_share):
+    if book_value_per_share == 0:
+        return None
+    return round(price / book_value_per_share, 2)
+
+
+def earnings_yield(eps, price):
+    if price == 0:
+        return None
+    return round((eps / price) * 100, 2)
+
+
+def book_value_per_share(equity, reserves, shares):
+    if shares == 0:
+        return None
+    return round((equity + reserves) / shares, 2)
+
+
+def valuation_label(pe):
+    if pe is None:
+        return "Unknown"
+
+    if pe < 15:
+        return "Undervalued"
+
+    if pe <= 30:
+        return "Fairly Valued"
+
+    return "Overvalued"
