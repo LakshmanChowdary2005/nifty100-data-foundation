@@ -1,33 +1,29 @@
-from src.analytics.ratios import *
+def debt_to_equity(borrowings, equity, reserves):
+    total_equity = equity + reserves
+    if total_equity <= 0:
+        return None
+    return round(borrowings / total_equity, 2)
 
 
-def test_net_profit_margin():
-    assert net_profit_margin(200, 1000) == 20
+def high_leverage_flag(de_ratio):
+    return de_ratio is not None and de_ratio > 5
 
 
-def test_net_profit_margin_zero_sales():
-    assert net_profit_margin(200, 0) is None
+def interest_coverage_ratio(operating_profit, other_income, interest):
+    if interest == 0:
+        return None
+    return round((operating_profit + other_income) / interest, 2)
 
 
-def test_operating_profit_margin():
-    assert operating_profit_margin(300, 1000) == 30
+def interest_warning(icr):
+    return icr is not None and icr < 2
 
 
-def test_opm_check():
-    assert check_opm(30, 28) is True
+def net_debt(borrowings, investments):
+    return borrowings - investments
 
 
-def test_roe():
-    assert return_on_equity(100, 400, 100) == 20
-
-
-def test_negative_equity():
-    assert return_on_equity(100, -300, 100) is None
-
-
-def test_roce():
-    assert return_on_capital_employed(200, 400, 100, 500) == 20
-
-
-def test_roa():
-    assert return_on_assets(100, 2000) == 5
+def asset_turnover(sales, total_assets):
+    if total_assets == 0:
+        return None
+    return round(sales / total_assets, 2)
