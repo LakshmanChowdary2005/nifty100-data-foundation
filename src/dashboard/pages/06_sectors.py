@@ -12,8 +12,37 @@ st.set_page_config(
 
 st.title("🏭 Sector Analysis")
 
-companies = get_companies()
-ratios = get_financial_ratios()
+with st.spinner("Loading Sector Analysis..."):
+    companies = get_companies()
+    ratios = get_financial_ratios()
+
+# -----------------------------
+# KPI Cards
+# -----------------------------
+
+k1, k2, k3, k4 = st.columns(4)
+
+k1.metric(
+    "Total Companies",
+    len(df)
+)
+
+k2.metric(
+    "Total Sectors",
+    df["sector"].nunique()
+)
+
+k3.metric(
+    "Average ROE",
+    f"{df['roe'].mean():.2f}%"
+)
+
+k4.metric(
+    "Average PE",
+    f"{df['pe_ratio'].mean():.2f}"
+)
+
+st.divider()
 
 # Merge company and ratio data
 df = companies.merge(ratios, on="company_id")
@@ -22,6 +51,24 @@ df = companies.merge(ratios, on="company_id")
 # Sector Distribution
 # -----------------------------
 st.subheader("📊 Companies by Sector")
+st.subheader("📌 Sector Performance Bubble Chart")
+
+fig_bubble = px.scatter(
+    df,
+    x="pe_ratio",
+    y="roe",
+    size="roa",
+    color="sector",
+    hover_name="company_name",
+    title="ROE vs PE Ratio"
+)
+
+st.plotly_chart(
+    fig_bubble,
+    use_container_width=True
+)
+
+st.divider()
 
 sector_count = (
     df.groupby("sector")
@@ -109,4 +156,35 @@ st.dataframe(
         ]
     ],
     use_container_width=True
+)
+st.subheader("📈 Sector Summary")
+
+summary = sector_df[
+    [
+        "roe",
+        "roa",
+        "pe_ratio",
+        "de_ratio"
+    ]
+].mean()
+
+st.table(summary)
+best = sector_df.sort_values(
+    "roe",
+    ascending=False
+).iloc[0]
+
+st.success(
+    f"""
+🏆 Best Company
+
+{best['company_name']}
+
+ROE : {best['roe']:.2f}%
+"""
+)
+st.divider()
+
+st.caption(
+    "📈 Nifty100 Analytics Dashboard | Sector Analysis | Sprint 4"
 )

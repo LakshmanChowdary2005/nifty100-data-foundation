@@ -11,14 +11,32 @@ st.set_page_config(page_title="Trend Analysis", layout="wide")
 
 st.title("📈 Trend Analysis")
 
-companies = get_companies()
-profit = get_profit_loss()
-balance = get_balance_sheet()
-cashflow = get_cashflow()
+with st.spinner("Loading Trend Analysis..."):
+    companies = get_companies()
+    profit = get_profit_loss()
+    balance = get_balance_sheet()
+    cashflow = get_cashflow()
 
-company = st.selectbox(
+st.sidebar.header("Company Search")
+
+search = st.sidebar.text_input(
+    "🔍 Search Company"
+)
+
+company_list = companies["company_name"].sort_values()
+
+if search:
+
+    company_list = company_list[
+        company_list.str.contains(
+            search,
+            case=False
+        )
+    ]
+
+company = st.sidebar.selectbox(
     "Select Company",
-    companies["company_name"].sort_values()
+    company_list
 )
 
 company_id = companies.loc[
@@ -27,28 +45,109 @@ company_id = companies.loc[
 ].values[0]
 
 # Filter Data
+# Filter Data
 profit_df = profit[profit["company_id"] == company_id]
+
+# Sort by Year
+profit_df = profit_df.sort_values("year")
+
+# Calculate Year-over-Year Growth
+profit_df["Sales Growth %"] = (
+    profit_df["sales"].pct_change() * 100
+)
+
+profit_df["Profit Growth %"] = (
+    profit_df["net_profit"].pct_change() * 100
+)
+
 balance_df = balance[balance["company_id"] == company_id]
 cash_df = cashflow[cashflow["company_id"] == company_id]
 
-# ---------------- Sales Trend ----------------
+# -------------------------------
+# KPI Cards
+# -------------------------------
 
-st.subheader("📊 Sales Trend")
+latest_profit = profit_df.sort_values("year").iloc[-1]
+latest_balance = balance_df.sort_values("year").iloc[-1]
+latest_cash = cash_df.sort_values("year").iloc[-1]
 
-fig1 = px.line(
-    profit_df,
-    x="year",
-    y="sales",
-    markers=True,
-    title="Sales"
+k1, k2, k3, k4 = st.columns(4)
+
+k1.metric(
+    "Sales",
+    f"{latest_profit['sales']:.2f}"
 )
 
-st.plotly_chart(fig1, use_container_width=True)
+k2.metric(
+    "Net Profit",
+    f"{latest_profit['net_profit']:.2f}"
+)
+
+k3.metric(
+    "Assets",
+    f"{latest_balance['assets']:.2f}"
+)
+
+k4.metric(
+    "Operating CF",
+    f"{latest_cash['operating_cf']:.2f}"
+)
+
+st.divider()
+
+# ---------------- Sales Trend ----------------
+
+st.subheader("📊 Multi Metric Trend")
+
+metrics = st.multiselect(
+    "Select up to 3 Metrics",
+    [
+        "sales",
+        "net_profit"
+    ],
+    default=["sales"]
+)
+
 
 # ---------------- Net Profit ----------------
 
 st.subheader("💰 Net Profit Trend")
 
+fig2 = px.line(
+    profit_df,
+    x="year",
+    y="net_profit",
+    markers=True,
+    title="Net Profit"
+)
+
+st.plotly_chart(fig2, use_container_width=True)
+st.subheader("📈 Year-over-Year Growth")
+
+st.dataframe(
+    profit_df[
+        [
+            "year",
+            "Sales Growth %",
+            "Profit Growth %"
+        ]
+    ],
+    use_container_width=True
+)
+
+fig1 = px.line(
+    profit_df,
+    x="year",
+    y=metrics,
+    markers=True,
+    title="Selected Financial Metrics"
+)
+
+st.plotly_chart(
+    fig1,
+    use_container_width=True
+)
+st.subheader("💰 Net Profit Trend")
 fig2 = px.line(
     profit_df,
     x="year",

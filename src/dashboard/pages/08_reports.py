@@ -9,8 +9,9 @@ st.set_page_config(
 st.title("📄 Annual Reports")
 
 # Load data
-companies = get_companies()
-documents = get_documents()
+with st.spinner("Loading Annual Reports..."):
+    companies = get_companies()
+    documents = get_documents()
 
 # Merge company names with documents
 df = documents.merge(
@@ -19,9 +20,26 @@ df = documents.merge(
 )
 
 # Company selection
-company = st.selectbox(
+st.sidebar.header("Company Search")
+
+search = st.sidebar.text_input(
+    "🔍 Search Company"
+)
+
+company_list = sorted(
+    df["company_name"].unique()
+)
+
+if search:
+
+    company_list = [
+        c for c in company_list
+        if search.lower() in c.lower()
+    ]
+
+company = st.sidebar.selectbox(
     "Select Company",
-    sorted(df["company_name"].unique())
+    company_list
 )
 
 filtered = df[df["company_name"] == company]
@@ -41,6 +59,12 @@ col3.metric("Sector", info["sector"])
 st.divider()
 
 st.subheader("Available Documents")
+st.metric(
+    "📄 Total Reports",
+    len(filtered)
+)
+
+st.divider()
 
 st.dataframe(
     filtered[
@@ -55,8 +79,22 @@ st.dataframe(
 st.subheader("Open Report")
 
 for _, row in filtered.iterrows():
-    st.markdown(
-        f"📄 **{row['document_type']}** - [Open Report]({row['url']})"
+
+    st.write(
+        f"📄 {row['document_type']}"
     )
 
+    st.link_button(
+        "Open Report",
+        row["url"]
+    )
+
+    st.divider()
+
 st.success("Reports Loaded Successfully ✅")
+
+st.divider()
+
+st.caption(
+    "📈 Nifty100 Analytics Dashboard | Annual Reports | Sprint 4"
+)

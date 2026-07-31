@@ -1,0 +1,2 @@
+company_id,company_name,sector,PE,PB,EV_EBITDA,FCF_yield_pct,Median_5Y_PE,PE_vs_sector_pct,flag
+7,Company_7,Banking,9.47,0,0,1.9300000000000002,18.02,52.55271920088791,Discount

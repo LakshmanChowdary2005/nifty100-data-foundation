@@ -10,13 +10,31 @@ st.set_page_config(page_title="Capital Allocation", layout="wide")
 
 st.title("💰 Capital Allocation Analysis")
 
-companies = get_companies()
-balance = get_balance_sheet()
-cashflow = get_cashflow()
+with st.spinner("Loading Capital Allocation..."):
+    companies = get_companies()
+    balance = get_balance_sheet()
+    cashflow = get_cashflow()
 
-company = st.selectbox(
+st.sidebar.header("Company Search")
+
+search = st.sidebar.text_input(
+    "🔍 Search Company"
+)
+
+company_list = companies["company_name"].sort_values()
+
+if search:
+
+    company_list = company_list[
+        company_list.str.contains(
+            search,
+            case=False
+        )
+    ]
+
+company = st.sidebar.selectbox(
     "Select Company",
-    companies["company_name"].sort_values()
+    company_list
 )
 
 company_id = companies.loc[
@@ -34,11 +52,37 @@ latest_balance = balance_df.sort_values("year").tail(1)
 if not latest_balance.empty:
     latest = latest_balance.iloc[0]
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns(4)
 
     c1.metric("🏦 Assets", f"{latest['assets']:,.0f}")
     c2.metric("📉 Liabilities", f"{latest['liabilities']:,.0f}")
     c3.metric("💼 Equity", f"{latest['equity']:,.0f}")
+    capital = latest["assets"] - latest["liabilities"]
+
+c4.metric(
+    "Capital",
+    f"{capital:,.0f}"
+)
+
+st.subheader("Capital Allocation Pattern")
+
+if capital > latest["equity"]:
+
+    st.success(
+        "🟢 Strong Capital Allocation"
+    )
+
+elif capital > 0:
+
+    st.warning(
+        "🟡 Moderate Capital Allocation"
+    )
+
+else:
+
+    st.error(
+        "🔴 Weak Capital Allocation"
+    )
 
 st.divider()
 
@@ -82,6 +126,16 @@ st.dataframe(
     cash_df,
     use_container_width=True
 )
+st.subheader("Capital Summary")
+
+summary = {
+    "Assets": latest["assets"],
+    "Liabilities": latest["liabilities"],
+    "Equity": latest["equity"],
+    "Capital": capital
+}
+
+st.table(summary)
 
 # ---------------- Balance Sheet Table ----------------
 
@@ -90,4 +144,33 @@ st.subheader("Balance Sheet Data")
 st.dataframe(
     balance_df,
     use_container_width=True
+)
+st.subheader("Capital Distribution")
+
+tree = px.treemap(
+    names=[
+        "Assets",
+        "Liabilities",
+        "Equity"
+    ],
+    parents=[
+        "",
+        "",
+        ""
+    ],
+    values=[
+        latest["assets"],
+        latest["liabilities"],
+        latest["equity"]
+    ]
+)
+
+st.plotly_chart(
+    tree,
+    use_container_width=True
+)
+st.divider()
+
+st.caption(
+    "📈 Nifty100 Analytics Dashboard | Capital Allocation | Sprint 4"
 )
